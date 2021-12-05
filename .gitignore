@@ -1,0 +1,7 @@
+docker/mysql/storage/**
+!docker/mysql/storage/**/
+!docker/mysql/storage/**/.gitkeep
+
+docker/redis/storage/**
+!docker/redis/storage/**/
+!docker/redis/storage/**/.gitkeep
