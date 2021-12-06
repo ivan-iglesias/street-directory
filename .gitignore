@@ -5,3 +5,5 @@ docker/mysql/storage/**
 docker/redis/storage/**
 !docker/redis/storage/**/
 !docker/redis/storage/**/.gitkeep
+
+.php-cs-fixer.cache

@@ -1,8 +1,8 @@
 #!/bin/sh
 
-if [ -f ../../src/tools/php-cs-fixer/vendor/bin/php-cs-fixer ]
+if [ -f ./src/tools/php-cs-fixer/vendor/bin/php-cs-fixer ]
 then
-    ../../src/tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --diff -v --rules=@PSR12 ../../src/src
+    ./src/tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --diff --rules=@PSR12 ./src/src
 
     if [ $? -ne 0 ]
     then
