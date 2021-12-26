@@ -3,35 +3,41 @@
 
 Street Directory API.
 
-## Usage
+## Setup
 
 1. Build and run docker containers using docker-compose
 
 ```
-docker-compose up -d --build
+make build up
 ```
 
 2. Enter into docker container
 
-```
-docker exec -it streetdirectory_php bash
+```sh
+# after enter the command, write 'php'
+make goto
 ```
 
 3. Install packages with composer
 
 ```
 composer i
+```
+
+4. Install development tools. As recommended on their website, **php-cs-fixer** is installed in a dedicated `composer.json`.
+
+```
 cd tools/php-cs-fixer
 composer i
 ```
 
-4. Check the website
+5. Check the website
 
 ```
 localhost:8080
 ```
 
-**Git Hooks**
+## Git Hooks
 
 Enable custom `pre-commit` hook to run [php-cs-fixer](https://cs.symfony.com) before each commit
 
@@ -46,8 +52,6 @@ chmod +x hooks/pre-commit
 ```
 ln -s ../../hooks/pre-commit .git/hooks/pre-commit
 ```
-
-> **_NOTE:_** php-cs-fixer has symfony 5 as a requirement, to avoid problems with the project composer file, we install it in a dedicated `composer.json` as recommended on their website.
 
 ## License
 
