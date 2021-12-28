@@ -6,6 +6,10 @@ load_test_environment:
 	php bin/console --env=test doctrine:migrations:migrate --no-interaction
 	php bin/console --env=test doctrine:fixtures:load --no-interaction
 
+test_all:
+	@make -s load_test_environment
+	bin/phpunit
+
 test_app:
 	@make -s load_test_environment
 	bin/phpunit --testsuite application

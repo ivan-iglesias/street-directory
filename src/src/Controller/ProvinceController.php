@@ -16,11 +16,23 @@ class ProvinceController extends AbstractController
         $this->repository = $repository;
     }
 
-    #[Route('/province', name: 'province')]
+    #[Route('/province', name: 'province_index')]
     public function index(): Response
     {
         $provinces = $this->repository->findAll();
 
         return $this->json($provinces);
+    }
+
+    #[Route('/province/{name}', name: 'province_show')]
+    public function show(string $name): Response
+    {
+        $province = $this->repository->findOneBy(['name' => $name]);
+
+        if (is_null($province)) {
+            return $this->json(null, Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($province);
     }
 }

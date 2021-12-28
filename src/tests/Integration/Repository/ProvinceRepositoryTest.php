@@ -4,34 +4,21 @@ namespace App\Tests\Integration\Repository;
 
 use App\DataFixtures\ProvinceFixtures;
 use App\Entity\Province;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class ProvinceRepositoryTest extends KernelTestCase
+class ProvinceRepositoryTest extends RepositoryTest
 {
-    private $entityManager;
+    private $repository;
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
+        parent::setUp();
 
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->entityManager->close();
-        $this->entityManager = null;
+        $this->repository = $this->getRepository(Province::class);
     }
 
     public function test_find_all_provinces(): void
     {
-        $provinces = $this->entityManager
-            ->getRepository(Province::class)
-            ->findAll();
+        $provinces = $this->repository->findAll();
 
         $totalProvinces = count(ProvinceFixtures::PROVINCES);
 
@@ -40,12 +27,28 @@ class ProvinceRepositoryTest extends KernelTestCase
         $this->assertProvince($totalProvinces, $provinces[$totalProvinces-1]);
     }
 
-    public function assertProvince(int $expectedId, Province $province)
+    private function assertProvince(int $expectedId, Province $province): void
     {
         $expectedProvince = ProvinceFixtures::PROVINCES[$expectedId - 1];
 
         $this->assertSame($expectedId, $province->getId());
         $this->assertSame($expectedProvince[0], $province->getCode());
         $this->assertSame($expectedProvince[1], $province->getName());
+    }
+
+    public function test_should_find_a_province(): void
+    {
+        $province = $this->repository->findOneBy(['name' => 'bizkaia']);
+
+        $this->assertInstanceOf(Province::class, $province);
+        $this->assertSame('48', $province->getCode());
+        $this->assertSame('Bizkaia', $province->getName());
+    }
+
+    public function test_should_not_find_a_province(): void
+    {
+        $province = $this->repository->findOneBy(['name' => 'kansai']);
+
+        $this->assertNull($province);
     }
 }
