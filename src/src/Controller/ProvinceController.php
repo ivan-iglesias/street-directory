@@ -29,7 +29,8 @@ class ProvinceController extends AbstractController
 
         $data = $this->serializer->serialize(
             $provinces,
-            'json', ['groups' => ['province']]
+            'json',
+            ['groups' => ['province']]
         );
 
         return new JsonResponse($data, Response::HTTP_OK, [], true);
@@ -46,7 +47,8 @@ class ProvinceController extends AbstractController
 
         $data = $this->serializer->serialize(
             $province,
-            'json', ['groups' => ['province', 'province_detail', 'city']]
+            'json',
+            ['groups' => ['province', 'province_detail', 'city']]
         );
 
         return new JsonResponse($data, Response::HTTP_OK, [], true);
