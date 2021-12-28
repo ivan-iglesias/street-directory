@@ -8,6 +8,8 @@ use Doctrine\Persistence\ObjectManager;
 
 class ProvinceFixtures extends Fixture
 {
+    public const PROVINCE_REFERENCE = 'province';
+
     public const PROVINCES = [
         ['01', 'Álava'],
         ['02', 'Albacete'],
@@ -35,8 +37,20 @@ class ProvinceFixtures extends Fixture
             ;
 
             $manager->persist($province);
+
+            $this->addReference(
+                $this->getReferenceName($provinceData[1]),
+                $province
+            );
         }
 
         $manager->flush();
+    }
+
+    private function getReferenceName(string $name): string
+    {
+        $name = str_replace(' ', '-', strtolower($name));
+
+        return self::PROVINCE_REFERENCE . '-' . $name;
     }
 }

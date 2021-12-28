@@ -3,6 +3,7 @@
 namespace App\Tests\Integration\Repository;
 
 use App\DataFixtures\ProvinceFixtures;
+use App\Entity\City;
 use App\Entity\Province;
 
 class ProvinceRepositoryTest extends RepositoryTest
@@ -43,6 +44,15 @@ class ProvinceRepositoryTest extends RepositoryTest
         $this->assertInstanceOf(Province::class, $province);
         $this->assertSame('48', $province->getCode());
         $this->assertSame('Bizkaia', $province->getName());
+
+        $cities = $province->getCities();
+
+        $this->assertCount(25, $cities);
+
+        $city = $cities[0];
+        $this->assertInstanceOf(City::class, $city);
+        $this->assertSame('48001', $city->getCode());
+        $this->assertSame('Abadiño', $city->getName());
     }
 
     public function test_should_not_find_a_province(): void

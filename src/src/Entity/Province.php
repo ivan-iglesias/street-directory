@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\ProvinceRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProvinceRepository::class)]
 class Province
@@ -14,10 +17,21 @@ class Province
     private $id;
 
     #[ORM\Column(type: 'string', length: 2)]
+    #[Groups(['province'])]
     private $code;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['province'])]
     private $name;
+
+    #[ORM\OneToMany(mappedBy: 'province', targetEntity: City::class, orphanRemoval: true)]
+    #[Groups(['province_detail'])]
+    private $cities;
+
+    public function __construct()
+    {
+        $this->cities = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -44,6 +58,36 @@ class Province
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|City[]
+     */
+    public function getCities(): Collection
+    {
+        return $this->cities;
+    }
+
+    public function addCity(City $city): self
+    {
+        if (!$this->cities->contains($city)) {
+            $this->cities[] = $city;
+            $city->setProvince($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCity(City $city): self
+    {
+        if ($this->cities->removeElement($city)) {
+            // set the owning side to null (unless already changed)
+            if ($city->getProvince() === $this) {
+                $city->setProvince(null);
+            }
+        }
 
         return $this;
     }
