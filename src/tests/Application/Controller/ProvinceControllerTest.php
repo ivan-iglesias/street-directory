@@ -1,20 +1,13 @@
 <?php
 
-namespace App\Tests\Integration\Repository;
+namespace App\Tests\Application\Controller;
 
+use App\DataFixtures\CityFixtures;
 use App\DataFixtures\ProvinceFixtures;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class ProvinceControllerTest extends WebTestCase
+class ProvinceControllerTest extends ControllerTest
 {
-    private $client;
-
-    protected function setUp(): void
-    {
-        $this->client = static::createClient();
-    }
-
     public function test_find_all_provinces(): void
     {
         $response = $this->makeRequest('GET', '/province');
@@ -30,22 +23,19 @@ class ProvinceControllerTest extends WebTestCase
         $this->assertSame($expectedProvince[1], $provinces[0]['name']);
     }
 
-    public function test_should_find_a_province(): void
+    public function test_should_return_the_cities_of_the_province(): void
     {
-        $response = $this->makeRequest('GET', '/province/bizkaia');
+        $response = $this->makeRequest('GET', '/province/48/city');
 
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
-        $province = json_decode($response->getContent(), true);
+        $cities = json_decode($response->getContent(), true);
+        $expectedTotalCities = count(CityFixtures::CITIES);
 
-        $this->assertIsArray($province);
-        $this->assertArrayHasKey('code', $province);
-        $this->assertArrayHasKey('name', $province);
-        $this->assertArrayHasKey('cities', $province);
-        $this->assertSame('48', $province['code']);
-        $this->assertSame(25, count($province['cities']));
+        $this->assertIsArray($cities);
+        $this->assertCount($expectedTotalCities, $cities);
 
-        $city = $province['cities'][0];
+        $city = $cities[0];
         $this->assertIsArray($city);
         $this->assertArrayHasKey('code', $city);
         $this->assertArrayHasKey('name', $city);
@@ -53,18 +43,15 @@ class ProvinceControllerTest extends WebTestCase
         $this->assertSame('Abadiño', $city['name']);
     }
 
-    public function test_should_not_find_a_province(): void
+    /**
+     * @testWith ["XX"]
+     *           ["99"]
+     */
+    public function test_should_not_return_the_cities_of_the_province(string $provinceCode): void
     {
-        $response = $this->makeRequest('GET', '/province/kansai');
+        $response = $this->makeRequest('GET', "/province/{$provinceCode}/city");
 
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         $this->assertSame('null', $response->getContent());
-    }
-
-    private function makeRequest(string $method, string $url): Response
-    {
-        $this->client->request($method, $url);
-
-        return $this->client->getResponse();
     }
 }

@@ -25,7 +25,7 @@ class Province
     private $name;
 
     #[ORM\OneToMany(mappedBy: 'province', targetEntity: City::class, orphanRemoval: true)]
-    #[Groups(['province_detail'])]
+    #[Groups(['city'])]
     private $cities;
 
     public function __construct()

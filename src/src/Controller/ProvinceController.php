@@ -22,7 +22,7 @@ class ProvinceController extends AbstractController
         $this->serializer = $serializer;
     }
 
-    #[Route('/province', name: 'province_index')]
+    #[Route('/province', name: 'province')]
     public function index(): Response
     {
         $provinces = $this->repository->findAll();
@@ -36,19 +36,19 @@ class ProvinceController extends AbstractController
         return new JsonResponse($data, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/province/{name}', name: 'province_show')]
-    public function show(string $name): Response
+    #[Route('/province/{provinceCode}/city', name: 'province_city')]
+    public function show(string $provinceCode): Response
     {
-        $province = $this->repository->findOneBy(['name' => $name]);
+        $province = $this->repository->findOneBy(['code' => $provinceCode]);
 
         if (is_null($province)) {
             return $this->json(null, Response::HTTP_NOT_FOUND);
         }
 
         $data = $this->serializer->serialize(
-            $province,
+            $province->getCities(),
             'json',
-            ['groups' => ['province', 'province_detail', 'city']]
+            ['groups' => ['city']]
         );
 
         return new JsonResponse($data, Response::HTTP_OK, [], true);

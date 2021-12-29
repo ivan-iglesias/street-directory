@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\DataFixtures\Trait\ReferenceName;
 use App\Entity\City;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -9,7 +10,9 @@ use Doctrine\Persistence\ObjectManager;
 
 class CityFixtures extends Fixture implements DependentFixtureInterface
 {
-    public const PROVINCE_REFERENCE_NAME = ProvinceFixtures::PROVINCE_REFERENCE . '-' . 'bizkaia';
+    use ReferenceName;
+
+    public const REFERENCE_NAME = 'city';
 
     public const CITIES = [
         ['48001', 'Abadiño'],
@@ -41,18 +44,25 @@ class CityFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
+        $province = $this->getReference(
+            $this->getReferenceName(ProvinceFixtures::REFERENCE_NAME, 'bizkaia')
+        );
+
         foreach (self::CITIES as $cityData) {
             $city = new City();
 
             $city
-                ->setProvince(
-                    $this->getReference(self::PROVINCE_REFERENCE_NAME)
-                )
+                ->setProvince($province)
                 ->setCode($cityData[0])
                 ->setName($cityData[1])
             ;
 
             $manager->persist($city);
+
+            $this->addReference(
+                $this->getReferenceName(self::REFERENCE_NAME, $cityData[1]),
+                $city
+            );
         }
 
         $manager->flush();

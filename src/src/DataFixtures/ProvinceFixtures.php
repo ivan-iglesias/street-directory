@@ -2,13 +2,16 @@
 
 namespace App\DataFixtures;
 
+use App\DataFixtures\Trait\ReferenceName;
 use App\Entity\Province;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
 class ProvinceFixtures extends Fixture
 {
-    public const PROVINCE_REFERENCE = 'province';
+    use ReferenceName;
+
+    public const REFERENCE_NAME = 'province';
 
     public const PROVINCES = [
         ['01', 'Álava'],
@@ -39,18 +42,11 @@ class ProvinceFixtures extends Fixture
             $manager->persist($province);
 
             $this->addReference(
-                $this->getReferenceName($provinceData[1]),
+                $this->getReferenceName(self::REFERENCE_NAME, $provinceData[1]),
                 $province
             );
         }
 
         $manager->flush();
-    }
-
-    private function getReferenceName(string $name): string
-    {
-        $name = str_replace(' ', '-', strtolower($name));
-
-        return self::PROVINCE_REFERENCE . '-' . $name;
     }
 }

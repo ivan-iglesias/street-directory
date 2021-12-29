@@ -39,7 +39,7 @@ class ProvinceRepositoryTest extends RepositoryTest
 
     public function test_should_find_a_province(): void
     {
-        $province = $this->repository->findOneBy(['name' => 'bizkaia']);
+        $province = $this->repository->findOneBy(['code' => '48']);
 
         $this->assertInstanceOf(Province::class, $province);
         $this->assertSame('48', $province->getCode());
@@ -48,16 +48,16 @@ class ProvinceRepositoryTest extends RepositoryTest
         $cities = $province->getCities();
 
         $this->assertCount(25, $cities);
-
-        $city = $cities[0];
-        $this->assertInstanceOf(City::class, $city);
-        $this->assertSame('48001', $city->getCode());
-        $this->assertSame('Abadiño', $city->getName());
+        $this->assertInstanceOf(City::class, $cities[0]);
     }
 
-    public function test_should_not_find_a_province(): void
+    /**
+     * @testWith ["XX"]
+     *           ["99"]
+     */
+    public function test_should_not_find_a_province($provinceCode): void
     {
-        $province = $this->repository->findOneBy(['name' => 'kansai']);
+        $province = $this->repository->findOneBy(['code' => $provinceCode]);
 
         $this->assertNull($province);
     }
