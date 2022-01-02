@@ -40,16 +40,19 @@ class CityFixtures extends Fixture implements DependentFixtureInterface
         ['48905', 'Zamudio'],
         ['48097', 'Zaratamo'],
         ['48024', 'Zeanuri'],
+        ['20019', 'Beasain', 'gipuzkoa'],
+        ['20040', 'Hernani', 'gipuzkoa'],
+        ['20069', 'San Sebastián', 'gipuzkoa'],
     ];
 
     public function load(ObjectManager $manager): void
     {
-        $province = $this->getReference(
-            $this->getReferenceName(ProvinceFixtures::REFERENCE_NAME, 'bizkaia')
-        );
-
         foreach (self::CITIES as $cityData) {
             $city = new City();
+
+            $province = $this->getReference(
+                $this->getReferenceName(ProvinceFixtures::REFERENCE_NAME, $cityData[2] ?? 'bizkaia')
+            );
 
             $city
                 ->setProvince($province)

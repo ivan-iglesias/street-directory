@@ -7,40 +7,88 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CityControllerTest extends ControllerTest
 {
-    public function test_should_return_the_streets_of_the_city(): void
+    /** @test */
+    public function find_city_streets_not_found(): void
+    {
+        $response = $this->makeRequest('GET', '/city/99999/street');
+
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    /** @test */
+    public function find_city_streets(): void
     {
         $response = $this->makeRequest('GET', '/city/48020/street');
 
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-
-        $streets = json_decode($response->getContent(), true);
-        $expectedTotalStreets = count(StreetFixtures::STREETS);
-
-        $this->assertIsArray($streets);
-        $this->assertCount($expectedTotalStreets, $streets);
-
-        $street = $streets[0];
-        $this->assertIsArray($street);
-        $this->assertArrayHasKey('thoroughfare', $street);
-        $this->assertArrayHasKey('name', $street);
-        $this->assertSame('Iruña', $street['name']);
-
-        $thoroughfare = $street['thoroughfare'];
-        $this->assertArrayHasKey('code', $thoroughfare);
-        $this->assertArrayHasKey('name', $thoroughfare);
-        $this->assertSame('CL', $thoroughfare['code']);
-        $this->assertSame('Calle', $thoroughfare['name']);
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 1,
+                'pageTotalItems' => 13,
+                'pageFirstItem' => StreetFixtures::STREETS[0],
+            ],
+            $response
+        );
     }
 
-    /**
-     * @testWith ["XX"]
-     *           ["99"]
-     */
-    public function test_should_not_return_the_streets_of_the_city(string $cityCode): void
+    /** @test */
+    public function find_city_streets_first_pagination_page(): void
     {
-        $response = $this->makeRequest('GET', "/city/{$cityCode}/street");
+        $response = $this->makeRequest('GET', '/city/48020/street?pageSize=10&page=1');
 
-        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-        $this->assertSame('null', $response->getContent());
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 2,
+                'pageTotalItems' => 10,
+                'pageFirstItem' => StreetFixtures::STREETS[0],
+            ],
+            $response
+        );
+    }
+
+    /** @test */
+    public function find_city_streets_last_pagination_page(): void
+    {
+        $response = $this->makeRequest('GET', '/city/48020/street?pageSize=10&page=2');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 2,
+                'pageTotalItems' => 3,
+                'pageFirstItem' => StreetFixtures::STREETS[10],
+            ],
+            $response
+        );
+    }
+
+    /** @test */
+    public function find_city_streets_page_out_of_range(): void
+    {
+        $response = $this->makeRequest('GET', '/city/48020/street?pageSize=10&page=999');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 2,
+                'pageTotalItems' => 0,
+            ],
+            $response
+        );
+    }
+
+    public function assertReponse(array $expected, Response $response): void
+    {
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertHeaders($expected, $response->headers);
+
+        $items = json_decode($response->getContent(), true);
+        $this->assertCount($expected['pageTotalItems'], $items);
+
+        if (isset($expected['pageFirstItem'])) {
+            $this->assertSame($expected['pageFirstItem'][0], $items[0]['thoroughfare']['code']);
+            $this->assertSame($expected['pageFirstItem'][1], $items[0]['name']);
+        }
     }
 }

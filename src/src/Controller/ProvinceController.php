@@ -2,55 +2,65 @@
 
 namespace App\Controller;
 
+use App\Paginator\JsonResponsePaginator;
+use App\Repository\CityRepository;
 use App\Repository\ProvinceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ProvinceController extends AbstractController
 {
-    private ProvinceRepository $repository;
-    private SerializerInterface $serializer;
-
     public function __construct(
-        ProvinceRepository $repository,
-        SerializerInterface $serializer
-    ) {
-        $this->repository = $repository;
-        $this->serializer = $serializer;
-    }
+        private ProvinceRepository $provinceRepository,
+        private CityRepository $cityRepository,
+        private SerializerInterface $serializer
+    ) {}
 
     #[Route('/province', name: 'province')]
-    public function index(): Response
+    public function findAll(Request $request): Response
     {
-        $provinces = $this->repository->findAll();
+        $paginator = $this->provinceRepository->findAllPaginate(
+            $request->query->get('page'),
+            $request->query->get('pageSize')
+        );
 
         $data = $this->serializer->serialize(
-            $provinces,
+            $paginator->getItems(),
             'json',
             ['groups' => ['province']]
         );
 
-        return new JsonResponse($data, Response::HTTP_OK, [], true);
+        return new JsonResponsePaginator($data, $paginator);
     }
 
     #[Route('/province/{provinceCode}/city', name: 'province_city')]
-    public function show(string $provinceCode): Response
-    {
-        $province = $this->repository->findOneBy(['code' => $provinceCode]);
+    public function findProvinceCities(
+        Request $request,
+        string $provinceCode
+    ): Response {
+        $province = $this->provinceRepository->findOneBy([
+            'code' => $provinceCode
+        ]);
 
         if (is_null($province)) {
             return $this->json(null, Response::HTTP_NOT_FOUND);
         }
 
+        $paginator = $this->cityRepository->findByProvinceCode(
+            $provinceCode,
+            $request->query->get('page'),
+            $request->query->get('pageSize')
+        );
+
         $data = $this->serializer->serialize(
-            $province->getCities(),
+            $paginator->getItems(),
             'json',
             ['groups' => ['city']]
         );
 
-        return new JsonResponse($data, Response::HTTP_OK, [], true);
+        return new JsonResponsePaginator($data, $paginator);
     }
 }

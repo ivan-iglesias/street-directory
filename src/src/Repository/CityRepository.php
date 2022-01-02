@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\City;
+use App\Paginator\PagerfantaPaginator;
+use App\Paginator\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,9 +16,33 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CityRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private PagerfantaPaginator $paginator
+    ) {
         parent::__construct($registry, City::class);
+    }
+
+    public function findByProvinceCode(
+        string $provinceCode,
+        ?int $page,
+        ?int $pageSize
+    ): Paginator {
+        $queryBuilder = $this
+            ->createQueryBuilder('c')
+            ->join('c.province', 'p')
+            ->where('p.code = :provinceCode')
+            ->setParameter('provinceCode', $provinceCode)
+            ->orderBy('c.id', 'ASC')
+        ;
+
+        $this->paginator->paginate(
+            $queryBuilder,
+            $page,
+            $pageSize
+        );
+
+        return $this->paginator;
     }
 
     // /**

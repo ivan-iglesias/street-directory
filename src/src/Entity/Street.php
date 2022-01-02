@@ -21,7 +21,7 @@ class Street
     #[ORM\JoinColumn(nullable: false)]
     private $city;
 
-    #[ORM\ManyToOne(targetEntity: Thoroughfare::class)]
+    #[ORM\ManyToOne(targetEntity: Thoroughfare::class, fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['thoroughfare'])]
     private $thoroughfare;

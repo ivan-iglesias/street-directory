@@ -8,50 +8,166 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ProvinceControllerTest extends ControllerTest
 {
-    public function test_find_all_provinces(): void
+    /** @test */
+    public function find_all(): void
     {
         $response = $this->makeRequest('GET', '/province');
 
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 1,
+                'pageTotalItems' => 13,
+            ],
+            $response
+        );
 
-        $provinces = json_decode($response->getContent(), true);
-        $expectedTotalProvinces = count(ProvinceFixtures::PROVINCES);
-        $expectedProvince = ProvinceFixtures::PROVINCES[0];
-
-        $this->assertCount($expectedTotalProvinces, $provinces);
-        $this->assertSame($expectedProvince[0], $provinces[0]['code']);
-        $this->assertSame($expectedProvince[1], $provinces[0]['name']);
+        $this->assertProvince(ProvinceFixtures::PROVINCES[0], $response);
     }
 
-    public function test_should_return_the_cities_of_the_province(): void
+    /** @test */
+    public function find_all_first_pagination_page(): void
+    {
+        $response = $this->makeRequest('GET', '/province?pageSize=10&page=1');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 2,
+                'pageTotalItems' => 10,
+            ],
+            $response
+        );
+
+        $this->assertProvince(ProvinceFixtures::PROVINCES[0], $response);
+    }
+
+    /** @test */
+    public function find_all_last_pagination_page(): void
+    {
+        $response = $this->makeRequest('GET', '/province?pageSize=10&page=2');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 2,
+                'pageTotalItems' => 3,
+            ],
+            $response
+        );
+
+        $this->assertProvince(ProvinceFixtures::PROVINCES[10], $response);
+    }
+
+    /** @test */
+    public function find_all_page_out_of_range(): void
+    {
+        $response = $this->makeRequest('GET', '/province?pageSize=10&page=999');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 13,
+                'totalPages' => 2,
+                'pageTotalItems' => 0,
+            ],
+            $response
+        );
+    }
+
+    /** @test */
+    public function find_province_cities_not_found(): void
+    {
+        $response = $this->makeRequest('GET', '/province/99999/city');
+
+        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+    }
+
+    /** @test */
+    public function find_province_cities(): void
     {
         $response = $this->makeRequest('GET', '/province/48/city');
 
-        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertReponse(
+            [
+                'totalItems' => 25,
+                'totalPages' => 2,
+                'pageTotalItems' => 24,
+            ],
+            $response
+        );
 
-        $cities = json_decode($response->getContent(), true);
-        $expectedTotalCities = count(CityFixtures::CITIES);
-
-        $this->assertIsArray($cities);
-        $this->assertCount($expectedTotalCities, $cities);
-
-        $city = $cities[0];
-        $this->assertIsArray($city);
-        $this->assertArrayHasKey('code', $city);
-        $this->assertArrayHasKey('name', $city);
-        $this->assertSame('48001', $city['code']);
-        $this->assertSame('Abadiño', $city['name']);
+        $this->assertCity(CityFixtures::CITIES[0], $response);
     }
 
-    /**
-     * @testWith ["XX"]
-     *           ["99"]
-     */
-    public function test_should_not_return_the_cities_of_the_province(string $provinceCode): void
+    /** @test */
+    public function find_province_cities_first_pagination_page(): void
     {
-        $response = $this->makeRequest('GET', "/province/{$provinceCode}/city");
+        $response = $this->makeRequest('GET', '/province/48/city?pageSize=10&page=1');
 
-        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-        $this->assertSame('null', $response->getContent());
+        $this->assertReponse(
+            [
+                'totalItems' => 25,
+                'totalPages' => 3,
+                'pageTotalItems' => 10,
+            ],
+            $response
+        );
+
+        $this->assertCity(CityFixtures::CITIES[0], $response);
+    }
+
+    /** @test */
+    public function find_province_cities_last_pagination_page(): void
+    {
+        $response = $this->makeRequest('GET', '/province/48/city?pageSize=10&page=3');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 25,
+                'totalPages' => 3,
+                'pageTotalItems' => 5,
+            ],
+            $response
+        );
+
+        $this->assertCity(CityFixtures::CITIES[20], $response);
+    }
+
+    /** @test */
+    public function find_province_cities_page_out_of_range(): void
+    {
+        $response = $this->makeRequest('GET', '/province/48/city?pageSize=10&page=999');
+
+        $this->assertReponse(
+            [
+                'totalItems' => 25,
+                'totalPages' => 3,
+                'pageTotalItems' => 0,
+            ],
+            $response
+        );
+    }
+
+    public function assertReponse(array $expected, Response $response): void
+    {
+        $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertHeaders($expected, $response->headers);
+
+        $items = json_decode($response->getContent(), true);
+        $this->assertCount($expected['pageTotalItems'], $items);
+    }
+
+    public function assertProvince(array $expectedFirstItem, Response $response): void
+    {
+        $items = json_decode($response->getContent(), true);
+        $this->assertSame($expectedFirstItem[0], $items[0]['code']);
+        $this->assertSame($expectedFirstItem[1], $items[0]['name']);
+    }
+
+    public function assertCity(array $expectedFirstItem, Response $response): void
+    {
+        $items = json_decode($response->getContent(), true);
+        $this->assertSame($expectedFirstItem[0], $items[0]['code']);
+        $this->assertSame($expectedFirstItem[1], $items[0]['name']);
     }
 }

@@ -2,41 +2,44 @@
 
 namespace App\Controller;
 
+use App\Paginator\JsonResponsePaginator;
+use App\Repository\PortalRepository;
 use App\Repository\StreetRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class StreetController extends AbstractController
 {
-    private StreetRepository $repository;
-    private SerializerInterface $serializer;
-
     public function __construct(
-        StreetRepository $repository,
-        SerializerInterface $serializer
-    ) {
-        $this->repository = $repository;
-        $this->serializer = $serializer;
-    }
+        private StreetRepository $streetRepository,
+        private PortalRepository $portalRepository,
+        private SerializerInterface $serializer
+    ) {}
 
     #[Route('/street/{streetId}/portal', name: 'street_portal')]
-    public function showStreet(string $streetId): Response
+    public function findStreetPortals(Request $request, string $streetId): Response
     {
-        $city = $this->repository->find($streetId);
+        $street = $this->streetRepository->find($streetId);
 
-        if (is_null($city)) {
+        if (is_null($street)) {
             return $this->json(null, Response::HTTP_NOT_FOUND);
         }
 
+        $paginator = $this->portalRepository->findByStreetId(
+            $streetId,
+            $request->query->get('page'),
+            $request->query->get('pageSize')
+        );
+
         $data = $this->serializer->serialize(
-            $city->getPortals(),
+            $paginator->getItems(),
             'json',
             ['groups' => ['portal']]
         );
 
-        return new JsonResponse($data, Response::HTTP_OK, [], true);
+        return new JsonResponsePaginator($data, $paginator);
     }
 }

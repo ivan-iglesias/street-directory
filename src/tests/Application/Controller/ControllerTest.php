@@ -20,4 +20,17 @@ abstract class ControllerTest extends WebTestCase
 
         return $this->client->getResponse();
     }
+
+    protected function assertHeaders(
+        array $expected,
+        $headers
+    ): void {
+        $totalItems = $headers->get('total-items');
+        $this->assertNotNull($totalItems);
+        $this->assertSame((string)$expected['totalItems'], $totalItems);
+
+        $totalPages = $headers->get('total-pages');
+        $this->assertNotNull($totalPages);
+        $this->assertSame((string)$expected['totalPages'], $totalPages);
+    }
 }

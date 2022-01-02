@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Portal;
+use App\Paginator\PagerfantaPaginator;
+use App\Paginator\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,9 +16,33 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PortalRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private PagerfantaPaginator $paginator
+    ) {
         parent::__construct($registry, Portal::class);
+    }
+
+    public function findByStreetId(
+        int $streetId,
+        ?int $page,
+        ?int $pageSize
+    ): Paginator {
+        $queryBuilder = $this
+            ->createQueryBuilder('p')
+            ->join('p.street', 's')
+            ->where('s.id = :streetId')
+            ->setParameter('streetId', $streetId)
+            ->orderBy('p.id', 'ASC')
+        ;
+
+        $this->paginator->paginate(
+            $queryBuilder,
+            $page,
+            $pageSize
+        );
+
+        return $this->paginator;
     }
 
     // /**
