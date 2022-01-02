@@ -10,7 +10,7 @@ class StreetControllerTest extends ControllerTest
     /** @test */
     public function find_street_portals_not_found(): void
     {
-        $response = $this->makeRequest('GET', '/street/99999/portal');
+        $response = $this->makeRequest('GET', '/street/d9e7a184-5d5b-11ea-a62a-3499710062d0/portal');
 
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
@@ -18,7 +18,7 @@ class StreetControllerTest extends ControllerTest
     /** @test */
     public function find_street_portals(): void
     {
-        $response = $this->makeRequest('GET', '/street/1/portal');
+        $response = $this->makeRequest('GET', '/street/7fbe27e3-0b58-48dd-8ba3-8cd23df30105/portal');
 
         $this->assertReponse(
             [
@@ -34,7 +34,7 @@ class StreetControllerTest extends ControllerTest
     /** @test */
     public function find_street_portals_first_pagination_page(): void
     {
-        $response = $this->makeRequest('GET', '/street/1/portal?pageSize=5&page=1');
+        $response = $this->makeRequest('GET', '/street/7fbe27e3-0b58-48dd-8ba3-8cd23df30105/portal?pageSize=5&page=1');
 
         $this->assertReponse(
             [
@@ -50,7 +50,7 @@ class StreetControllerTest extends ControllerTest
     /** @test */
     public function find_street_portals_last_pagination_page(): void
     {
-        $response = $this->makeRequest('GET', '/street/1/portal?pageSize=5&page=2');
+        $response = $this->makeRequest('GET', '/street/7fbe27e3-0b58-48dd-8ba3-8cd23df30105/portal?pageSize=5&page=2');
 
         $this->assertReponse(
             [
@@ -66,7 +66,7 @@ class StreetControllerTest extends ControllerTest
     /** @test */
     public function find_street_portals_page_out_of_range(): void
     {
-        $response = $this->makeRequest('GET', '/street/1/portal?pageSize=5&page=999');
+        $response = $this->makeRequest('GET', '/street/7fbe27e3-0b58-48dd-8ba3-8cd23df30105/portal?pageSize=5&page=999');
 
         $this->assertReponse(
             [

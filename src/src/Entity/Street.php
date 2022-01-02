@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: StreetRepository::class)]
 class Street
@@ -14,8 +15,11 @@ class Street
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['street'])]
     private $id;
+
+    #[ORM\Column(type: 'uuid', unique: true)]
+    #[Groups(['street'])]
+    private $uuid;
 
     #[ORM\ManyToOne(targetEntity: City::class, inversedBy: 'streets')]
     #[ORM\JoinColumn(nullable: false)]
@@ -36,12 +40,25 @@ class Street
 
     public function __construct()
     {
+        $this->uuid = Uuid::v4();
         $this->portals = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUuid(): Uuid
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(Uuid $uuid): self
+    {
+        $this->uuid = $uuid;
+
+        return $this;
     }
 
     public function getCity(): ?City

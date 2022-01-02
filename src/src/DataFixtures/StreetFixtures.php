@@ -7,6 +7,7 @@ use App\Entity\Street;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\Uid\Uuid;
 
 class StreetFixtures extends Fixture implements DependentFixtureInterface
 {
@@ -15,7 +16,7 @@ class StreetFixtures extends Fixture implements DependentFixtureInterface
     public const REFERENCE_NAME = 'street';
 
     public const STREETS = [
-        ['CL', 'Iruña'],
+        ['CL', 'Iruña', '7fbe27e3-0b58-48dd-8ba3-8cd23df30105'],
         ['AV', 'Aguirre Lehendakari'],
         ['CL', 'Larrakotorre'],
         ['CM', 'Etxezuribidea'],
@@ -48,6 +49,10 @@ class StreetFixtures extends Fixture implements DependentFixtureInterface
                 ->setThoroughfare($thoroughfare)
                 ->setName($streetData[1])
             ;
+
+            if (count($streetData) === 3) {
+                $street->setUuid(Uuid::fromString($streetData[2]));
+            }
 
             $manager->persist($street);
 

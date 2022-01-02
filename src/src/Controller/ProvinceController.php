@@ -37,13 +37,13 @@ class ProvinceController extends AbstractController
         return new JsonResponsePaginator($data, $paginator);
     }
 
-    #[Route('/province/{provinceCode}/city', name: 'province_city')]
+    #[Route('/province/{code}/city', name: 'province_city')]
     public function findProvinceCities(
         Request $request,
-        string $provinceCode
+        string $code
     ): Response {
         $province = $this->provinceRepository->findOneBy([
-            'code' => $provinceCode
+            'code' => $code
         ]);
 
         if (is_null($province)) {
@@ -51,7 +51,7 @@ class ProvinceController extends AbstractController
         }
 
         $paginator = $this->cityRepository->findByProvinceCode(
-            $provinceCode,
+            $code,
             $request->query->get('page'),
             $request->query->get('pageSize')
         );

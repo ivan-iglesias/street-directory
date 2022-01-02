@@ -20,13 +20,13 @@ class CityController extends AbstractController
     ) {
     }
 
-    #[Route('/city/{cityCode}/street', name: 'city_street')]
+    #[Route('/city/{code}/street', name: 'city_street')]
     public function findCityStreets(
         Request $request,
-        string $cityCode
+        string $code
     ): Response {
         $city = $this->cityRepository->findOneBy([
-            'code' => $cityCode
+            'code' => $code
         ]);
 
         if (is_null($city)) {
@@ -34,7 +34,7 @@ class CityController extends AbstractController
         }
 
         $paginator = $this->streetRepository->findByCityCode(
-            $cityCode,
+            $code,
             $request->query->get('page'),
             $request->query->get('pageSize')
         );

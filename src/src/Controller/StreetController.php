@@ -20,17 +20,19 @@ class StreetController extends AbstractController
     ) {
     }
 
-    #[Route('/street/{streetId}/portal', name: 'street_portal')]
-    public function findStreetPortals(Request $request, string $streetId): Response
+    #[Route('/street/{uuid}/portal', name: 'street_portal')]
+    public function findStreetPortals(Request $request, string $uuid): Response
     {
-        $street = $this->streetRepository->find($streetId);
+        $street = $this->streetRepository->findOneBy([
+            'uuid' => $uuid
+        ]);
 
         if (is_null($street)) {
             return $this->json(null, Response::HTTP_NOT_FOUND);
         }
 
-        $paginator = $this->portalRepository->findByStreetId(
-            $streetId,
+        $paginator = $this->portalRepository->findByStreetUuid(
+            $uuid,
             $request->query->get('page'),
             $request->query->get('pageSize')
         );

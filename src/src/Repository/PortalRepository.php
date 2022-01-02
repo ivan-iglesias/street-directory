@@ -23,16 +23,16 @@ class PortalRepository extends ServiceEntityRepository
         parent::__construct($registry, Portal::class);
     }
 
-    public function findByStreetId(
-        int $streetId,
+    public function findByStreetUuid(
+        string $streetUuid,
         ?int $page,
         ?int $pageSize
     ): Paginator {
         $queryBuilder = $this
             ->createQueryBuilder('p')
             ->join('p.street', 's')
-            ->where('s.id = :streetId')
-            ->setParameter('streetId', $streetId)
+            ->where('s.uuid = :streetUuid')
+            ->setParameter('streetUuid', $streetUuid, 'uuid')
             ->orderBy('p.id', 'ASC')
         ;
 
