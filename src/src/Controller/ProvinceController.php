@@ -17,7 +17,8 @@ class ProvinceController extends AbstractController
         private ProvinceRepository $provinceRepository,
         private CityRepository $cityRepository,
         private SerializerInterface $serializer
-    ) {}
+    ) {
+    }
 
     #[Route('/province', name: 'province')]
     public function findAll(Request $request): Response

@@ -17,7 +17,8 @@ class CityController extends AbstractController
         private CityRepository $cityRepository,
         private StreetRepository $streetRepository,
         private SerializerInterface $serializer
-    ) {}
+    ) {
+    }
 
     #[Route('/city/{cityCode}/street', name: 'city_street')]
     public function findCityStreets(

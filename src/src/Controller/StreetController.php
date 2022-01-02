@@ -17,7 +17,8 @@ class StreetController extends AbstractController
         private StreetRepository $streetRepository,
         private PortalRepository $portalRepository,
         private SerializerInterface $serializer
-    ) {}
+    ) {
+    }
 
     #[Route('/street/{streetId}/portal', name: 'street_portal')]
     public function findStreetPortals(Request $request, string $streetId): Response
